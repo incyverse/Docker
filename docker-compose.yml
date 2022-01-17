@@ -1,0 +1,81 @@
+version: '3.8'
+
+networks:
+  frontend:
+    name: ${ENV_NAME}_frontend
+    driver: ${NETWORKS_DRIVER}
+  backend:
+    name: ${ENV_NAME}_backend
+    driver: ${NETWORKS_DRIVER}
+
+volumes:
+  docker-in-docker:
+    name: ${ENV_NAME}_dind
+    driver: ${VOLUMES_DRIVER}
+
+services:
+  docker-in-docker:
+    container_name: ${ENV_NAME}-dind
+    image: docker:latest
+    privileged: true
+    volumes:
+      - ${APP_CODE_HOST_PATH}:${APP_CODE_CONTAINER_PATH}
+      - docker-in-docker:/certs/client
+    environment:
+      - DOCKER_TLS_SAN=DNS:docker-in-docker
+    expose:
+      - 2375
+    networks:
+      - backend
+
+  #
+  #───────────────────────────────────────────────────────────────────────────────
+  # WORKSPACE:
+  #───────────────────────────────────────────────────────────────────────────────
+  #
+  workspace:
+    container_name: ${ENV_NAME}-workspace
+    image: ${ENV_NAME}_workspace
+    tty: true
+    build:
+      context: ./workspace
+      dockerfile: ${WORKSPACE_OS}.dockerfile
+      args:
+        - INSTALL_OMZ=${SHELL_OH_MY_ZSH}
+        - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
+        - INSTALL_SSH=${WORKSPACE_INSTALL_SSH}
+        - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
+        - NVM_NODEJS_ORG_MIRROR=${WORKSPACE_NVM_NODEJS_ORG_MIRROR}
+        - NPM_REGISTRY=${WORKSPACE_NPM_REGISTRY}
+        - NPM_FETCH_RETRIES=${WORKSPACE_NPM_FETCH_RETRIES}
+        - NPM_FETCH_RETRY_FACTOR=${WORKSPACE_NPM_FETCH_RETRY_FACTOR}
+        - NPM_FETCH_RETRY_MINTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MINTIMEOUT}
+        - NPM_FETCH_RETRY_MAXTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MAXTIMEOUT}
+        - NVMSH_VERSION=${NVMSH_VERSION}
+        - NODE_VERSION=${NODE_VERSION}
+        - YARN_VERSION=${YARN_VERSION}
+        - OS_VERSION=${OS_VERSION}
+        - ENV_NAME=${ENV_NAME}
+        - PGID=${WORKSPACE_PGID}
+        - PUID=${WORKSPACE_PUID}
+        - TZ=${ENV_TIMEZONE}
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    volumes:
+      - ${APP_CODE_HOST_PATH}:${APP_CODE_CONTAINER_PATH}${APP_CODE_CONTAINER_FLAG}
+      - docker-in-docker:/certs/client
+    environment:
+      - DOCKER_HOST=tcp://docker-in-docker:2375
+      - DOCKER_TLS_VERIFY=1
+      - DOCKER_TLS_CERTDIR=/certs
+      - DOCKER_CERT_PATH=/certs/client
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "${WORKSPACE_SSH_PORT}:22"
+    networks:
+      - frontend
+      - backend
+    links:
+      - docker-in-docker
