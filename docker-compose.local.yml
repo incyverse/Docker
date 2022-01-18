@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.9"
 
 networks:
   frontend:
@@ -16,7 +16,7 @@ volumes:
 services:
   docker-in-docker:
     container_name: ${ENV_NAME}-dind
-    image: docker:latest
+    image: docker:20.10-dind
     privileged: true
     volumes:
       - ${APP_CODE_HOST_PATH}:${APP_CODE_CONTAINER_PATH}
@@ -39,23 +39,11 @@ services:
     tty: true
     build:
       context: ./workspace
-      dockerfile: ${WORKSPACE_OS}.dockerfile
+      dockerfile: ${ENV_OS}.local.Dockerfile
       args:
-        - INSTALL_OMZ=${SHELL_OH_MY_ZSH}
-        - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
-        - INSTALL_SSH=${WORKSPACE_INSTALL_SSH}
-        - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
-        - NVM_NODEJS_ORG_MIRROR=${WORKSPACE_NVM_NODEJS_ORG_MIRROR}
-        - NPM_REGISTRY=${WORKSPACE_NPM_REGISTRY}
-        - NPM_FETCH_RETRIES=${WORKSPACE_NPM_FETCH_RETRIES}
-        - NPM_FETCH_RETRY_FACTOR=${WORKSPACE_NPM_FETCH_RETRY_FACTOR}
-        - NPM_FETCH_RETRY_MINTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MINTIMEOUT}
-        - NPM_FETCH_RETRY_MAXTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MAXTIMEOUT}
-        - NVMSH_VERSION=${NVMSH_VERSION}
-        - NODE_VERSION=${NODE_VERSION}
-        - YARN_VERSION=${YARN_VERSION}
         - OS_VERSION=${OS_VERSION}
         - ENV_NAME=${ENV_NAME}
+        - ENV_MODE=${ENV_MODE}
         - PGID=${WORKSPACE_PGID}
         - PUID=${WORKSPACE_PUID}
         - TZ=${ENV_TIMEZONE}
@@ -77,5 +65,35 @@ services:
     networks:
       - frontend
       - backend
+    links:
+      - docker-in-docker
+  
+  #
+  #───────────────────────────────────────────────────────────────────────────────
+  # openJDK:
+  #───────────────────────────────────────────────────────────────────────────────
+  #
+  openjdk:
+    container_name: ${ENV_NAME}-openjdk
+    image: ${ENV_NAME}_openjdk
+    build:
+      context: ./openjdk
+      dockerfile: local.Dockerfile
+    volumes:
+      - ${APP_CODE_HOST_PATH}:${APP_CODE_CONTAINER_PATH}${APP_CODE_CONTAINER_FLAG}
+    environment:
+      - DOCKER_HOST=tcp://docker-in-docker:2376
+      - DOCKER_TLS_VERIFY=1
+      - DOCKER_TLS_CERTDIR=/certs
+      - DOCKER_CERT_PATH=/certs/client
+      - FAKETIME=${JAVA_FAKETIME}
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "${JAVA_PORT}:8080"
+    networks:
+      - backend
+    depends_on:
+      - workspace
     links:
       - docker-in-docker

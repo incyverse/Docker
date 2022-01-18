@@ -3,9 +3,8 @@
 ## Create a docker development environment
 ___
 Enter the ***.Docker*** folder and copy ***example.env*** to ***.env***
-
 ```bash
-cp example.env .env
+$ cp example.env .env
 ```
 
 ***.env*** 파일을 열어 ***Environment*** 부분의 ***ENV_NAME***에 개발 환경 이름을 작성 한다.  
@@ -13,49 +12,67 @@ cp example.env .env
 
 ## Docker Commands
 ___
+
+### up
 Build the environment and run it using `docker-compose`
 ```bash
-# docker-compose up -d --build <service name>
-docker-compose up -d --build nginx mariadb
+$ docker-compose up -d --build [SERVICE ...]
 ```
 
+### ps
 List containers
 ```bash
-docker-compose ps
+$ docker-compose ps
 ```
 
-List networks
+### logs
+Check service logs, usually with -f option to check in real time.
 ```bash
-docker network ls
+$ docker-compose logs -f [SERVICE ...]
 ```
 
-Remove all unused networks
+### config
+Check Docker Compose settings
 ```bash
-docker network prune
+$ docker-compose config
 ```
 
-Check settings
+### exec
+Enter the container, to execute commands like
 ```bash
-docker-compose config
+$ docker-compose exec [CONTAINER] /bin/bash
+$ docker-compose exec --user=[env name] [CONTAINER] /bin/bash
+$ docker exec -it [CONTAINER] /bin/bash
 ```
 
-Enter the Workspace container, to execute commands like
-```bash
-docker-compose exec workspace zsh
-docker-compose exec --user=<environment name> workspace zsh
-```
-
-Check container logs, usually with -f option to check in real time.
-```bash
-docker-compose logs -f <container name>
-```
-
+### down
 ***docker-compose.yml*** 파일의 내용이 변경이 되었다면 기존 ***docker-compose.yml***로 생성된 container들을 삭제해준 후 재생성을 해야 한다.
 ```bash
-docker-compose down
+$ docker-compose down
 
 # with volumes
-docker-compose down -v
+$ docker-compose down -v
+```
+
+### rm
+Removes stopped service containers.
+```bash
+$ docker-compose rm
+```
+
+## network
+List networks
+```bash
+# List networks
+$ docker network ls
+
+# Remove all unused networks
+$ docker network prune
+```
+
+## volume
+```bash
+$ docker volume ls
 ```
 
 ## Build my docker account

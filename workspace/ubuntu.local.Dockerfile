@@ -3,8 +3,7 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG OS_VERSION
-# FROM incyverse/workspace:ubuntu-${OS_VERSION}
+
 FROM incyverse/workspace:ubuntu-20.04
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
@@ -34,7 +33,7 @@ RUN set -xe; \
     useradd -l -u ${PUID} -g ${ENV_NAME} -m ${ENV_NAME} -G docker_env && \
     usermod -p '*' ${ENV_NAME} -s /bin/bash
 
-# Set Timezone
+# Set timezone
 ARG TZ=UTC
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
