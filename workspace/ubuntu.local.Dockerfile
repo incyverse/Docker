@@ -3,7 +3,6 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-
 FROM incyverse/workspace:ubuntu-20.04
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
@@ -31,14 +30,20 @@ RUN set -xe; \
     apt-get update -yqq && \
     groupadd -g ${PGID} ${ENV_NAME} && \
     useradd -l -u ${PUID} -g ${ENV_NAME} -m ${ENV_NAME} -G docker_env && \
-    usermod -p '*' ${ENV_NAME} -s /bin/bash
+    usermod -p '*' ${ENV_NAME} -s /bin/bash && \
+    apt-get install -yqq \
+        apt-utils \
+        libzip-dev \
+        zip \
+        unzip \
+        nasm
 
 # Set timezone
 ARG TZ=UTC
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
-# User Aliases
+# User aliases
 COPY ./aliases.sh /root/aliases.sh
 COPY ./aliases.sh /home/${ENV_NAME}/aliases.sh
 
@@ -55,7 +60,6 @@ USER ${ENV_NAME}
 RUN echo '' >> ~/.bashrc && \
     echo '# Load Custom Aliases' >> ~/.bashrc && \
     echo 'source ~/aliases.sh' >> ~/.bashrc
-
 
 
 #

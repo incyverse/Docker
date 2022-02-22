@@ -1,4 +1,17 @@
+.DS_Store
 .idea
 .env
-.DS_Store
+.docker-sync
+
+/nginx/ssl/*.crt
+/nginx/ssl/*.csr
+/nginx/ssl/*.key
+
+/apache2/ssl/*.crt
+/apache2/ssl/*.csr
+/apache2/ssl/*.key
+/apache2/ssl/*.org
+
+/workspace/Dockerfile
+
 
