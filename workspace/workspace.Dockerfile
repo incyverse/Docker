@@ -17,8 +17,12 @@ ENV LC_CTYPE=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV TERM=xterm
 
+USER root
+
 RUN set -eux && \
     apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:ondrej/php && \
+    add-apt-repository -y ppa:git-core/ppa && \
     #
     #───────────────────────────────────────────────────────────────────────────────
     # Software's Installation
