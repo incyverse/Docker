@@ -117,7 +117,7 @@
                port="8009"
                redirectPort="8443" />
     -->
-    <!-- <Connector protocol="AJP/1.3" port="8009" connectionTimeout="20000" redirectPort="8443" secretRequired="false" URIEncoding="UTF-8" address="0.0.0.0" useBodyEncodingForURI="true" /> -->
+    <Connector protocol="AJP/1.3" port="8009" connectionTimeout="20000" redirectPort="8443" secretRequired="false" URIEncoding="UTF-8" address="0.0.0.0" useBodyEncodingForURI="true" />
 
     <!-- An Engine represents the entry point (within Catalina) that processes
          every request.  The Engine implementation for Tomcat stand alone
@@ -128,7 +128,7 @@
     <!-- You should set jvmRoute to support load-balancing via AJP ie :
     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
     -->
-    <!-- <Engine name="Catalina" defaultHost="localhost" jvmRoute="instance1"> -->
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="instance1">
 
       <!--For clustering, please take a look at documentation at:
           /docs/cluster-howto.html  (simple how to)
@@ -136,7 +136,7 @@
       <!--
       <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
       -->
-      <!-- <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster" channelSendOptions="8">
+      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster" channelSendOptions="8">
         <Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" />
         <Channel className="org.apache.catalina.tribes.group.GroupChannel">
           <Membership className="org.apache.catalina.tribes.membership.McastService" address="228.0.0.4" port="45564" frequency="500" dropTime="3000" />
@@ -152,7 +152,7 @@
 
         <Deployer className="org.apache.catalina.ha.deploy.FarmWarDeployer" tempDir="/tmp/war-temp/" deployDir="/tmp/war-deploy/" watchDir="tmp/war-listen/" watchEnabled="false"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
-      </Cluster> -->
+      </Cluster>
 
       <!-- Use the LockOutRealm to prevent attempts to guess user passwords
            via a brute-force attack -->

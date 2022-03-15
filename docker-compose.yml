@@ -124,7 +124,7 @@ services:
     volumes:
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/webapps:${TOMCAT_PATH}/webapps
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/logs:${TOMCAT_PATH}/logs
-      - ./conf:${TOMCAT_PATH}/conf2
+      - ./app-server/tomcat/conf:${TOMCAT_PATH}/conf
     ports:
       - "${TOMCAT_HTTP_PORT}:8080"
     networks:
@@ -154,9 +154,7 @@ services:
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/apache/logs:${APACHE_PATH}/logs
       - ${APACHE_SITES_PATH}:${APACHE_PATH}/conf/sites-available
       # - ${APACHE_SSL_PATH}:/etc/apache2/ssl
-      # - ./conf/workers.properties:${APACHE_PATH}/conf/workers.properties
-      # - ./conf/mod_jk.conf:${APACHE_PATH}/conf/mod_jk.conf
-      # - ./conf/httpd.conf:${APACHE_PATH}/conf/httpd.conf
+      - ./web-server/apache2/conf:${APACHE_PATH}/conf
     ports:
       - "${WEB_HTTP_PORT}:80"
       - "${WEB_HTTPS_PORT}:443"

@@ -25,8 +25,6 @@ RUN set -xe; \
 RUN mv /etc/localtime /etc/localtime_UTC && \
     ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
-COPY conf/vhosts.conf /usr/local/apache2/conf/vhosts.conf
-
 #
 #───────────────────────────────────────────────────────────────────────────────
 # Tomcat Connector:
