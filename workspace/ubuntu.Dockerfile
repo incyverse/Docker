@@ -7,7 +7,8 @@ FROM incyverse/workspace:ubuntu-20.04
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
-ARG PROJECT_NAME
+ARG GROUP
+ARG USER
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -30,9 +31,9 @@ ENV PUID=${PUID}
 # Always run apt update when start and after add new source list, then clean up at end.
 RUN set -xe; \
     apt-get update -yqq && \
-    groupadd -g ${PGID} ${PROJECT_NAME} && \
-    useradd -l -u ${PUID} -g ${PROJECT_NAME} -m ${PROJECT_NAME} -G docker_env && \
-    usermod -p '*' ${PROJECT_NAME} -s /bin/bash && \
+    groupadd -g ${PGID} ${GROUP} && \
+    useradd -l -u ${PUID} -g ${USER} -m ${USER} -G docker_env && \
+    usermod -p '*' ${USER} -s /bin/bash && \
     apt-get install -yqq \
         apt-utils \
         libzip-dev \
@@ -48,17 +49,17 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # User aliases
 COPY ./aliases.sh /root/aliases.sh
-COPY ./aliases.sh /home/${PROJECT_NAME}/aliases.sh
+COPY ./aliases.sh /home/${USER}/aliases.sh
 
 RUN sed -i 's/\r//' /root/aliases.sh && \
-    sed -i 's/\r//' /home/${PROJECT_NAME}/aliases.sh && \
-    chown ${PROJECT_NAME}:${PROJECT_NAME} /home/${PROJECT_NAME}/aliases.sh && \
+    sed -i 's/\r//' /home/${USER}/aliases.sh && \
+    chown ${GROUP}:${USER} /home/${USER}/aliases.sh && \
     echo '' >> ~/.bashrc && \
     echo '# Load Custom Aliases' >> ~/.bashrc && \
     echo 'source ~/aliases.sh' >> ~/.bashrc
 
 #────:
-USER ${PROJECT_NAME}
+USER ${USER}
 
 RUN echo '' >> ~/.bashrc && \
     echo '# Load Custom Aliases' >> ~/.bashrc && \
@@ -146,7 +147,7 @@ RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
 #───────────────────────────────────────────────────────────────────────────────
 #
 #────:
-USER ${PROJECT_NAME}
+USER ${USER}
 
 # Check if NVM needs to be installed
 ARG NODE_VERSION=node
@@ -162,7 +163,7 @@ ENV NVM_NODEJS_ORG_MIRROR=${NVM_NODEJS_ORG_MIRROR}
 
 ARG INSTALL_NODE=false
 
-ENV NVM_DIR=/home/${PROJECT_NAME}/.nvm
+ENV NVM_DIR=/home/${USER}/.nvm
 
 RUN if [ ${INSTALL_NODE} = true ]; then \
         # Install nvm (A Node Version Manager)
@@ -180,7 +181,7 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
         if [ ${NPM_REGISTRY} ]; then \
             npm config set registry ${NPM_REGISTRY}; \
         fi && \
-        ln -s `npm bin --global` /home/${PROJECT_NAME}/.node-bin; \
+        ln -s `npm bin --global` /home/${USER}/.node-bin; \
     fi
 
 # Wouldn't execute when added to the RUN statement in the above block
@@ -195,16 +196,16 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
 #────:
 USER root
 
-ENV PROJECT_NAME=${PROJECT_NAME}
+ENV USER=${USER}
 
 RUN if [ ${INSTALL_NODE} = true ]; then \
         echo '' >> ~/.bashrc && \
-        echo 'export NVM_DIR="/home/$PROJECT_NAME/.nvm"' >> ~/.bashrc && \
+        echo 'export NVM_DIR="/home/$USER/.nvm"' >> ~/.bashrc && \
         echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm' >> ~/.bashrc; \
     fi
 
 # Add PATH for node
-ENV PATH=$PATH:/home/${PROJECT_NAME}/.node-bin
+ENV PATH=$PATH:/home/${USER}/.node-bin
 
 # Make it so the node modules can be executed with 'docker-compose exec'
 # We'll create symbolic links into '/usr/local/bin'.
@@ -221,7 +222,7 @@ RUN if [ ${NPM_REGISTRY} ]; then \
 
 # Mount .npmrc into home folder
 COPY ./.npmrc /root/.npmrc
-COPY ./.npmrc /home/${PROJECT_NAME}/.npmrc
+COPY ./.npmrc /home/${USER}/.npmrc
 
 #
 #───────────────────────────────────────────────────────────────────────────────
@@ -276,8 +277,27 @@ RUN if [ ${INSTALL_SSH} = true ]; then \
         rm -f /tmp/id_rsa* && \
         chmod 644 /root/.ssh/authorized_keys /root/.ssh/id_rsa.pub && \
         chmod 400 /root/.ssh/id_rsa && \
-        cp -rf /root/.ssh /home/${PROJECT_NAME} && \
-        chown -R ${PROJECT_NAME}:${PROJECT_NAME} /home/${PROJECT_NAME}/.ssh; \
+        cp -rf /root/.ssh /home/${USER} && \
+        chown -R ${GROUP}:${USER} /home/${USER}/.ssh; \
+    fi
+
+#
+#───────────────────────────────────────────────────────────────────────────────
+# Supervisor:
+#───────────────────────────────────────────────────────────────────────────────
+#
+#────:
+USER root
+
+ARG INSTALL_SUPERVISOR=false
+
+RUN if [ ${INSTALL_SUPERVISOR} = true ]; then \
+        if [ ${INSTALL_PYTHON} = true ]; then \
+            python -m pip install --upgrade supervisor && \
+            echo_supervisord_conf > /etc/supervisord.conf && \
+            sed -i 's/\;\[include\]/\[include\]/g' /etc/supervisord.conf && \
+            sed -i 's/\;files\s.*/files = supervisord.d\/*.conf/g' /etc/supervisord.conf; \
+        fi; \
     fi
 
 #
@@ -286,7 +306,7 @@ RUN if [ ${INSTALL_SSH} = true ]; then \
 #───────────────────────────────────────────────────────────────────────────────
 #
 #────:
-USER ${PROJECT_NAME}
+USER ${USER}
 
 ARG INSTALL_YARN=false
 ARG YARN_VERSION=latest
@@ -309,12 +329,12 @@ USER root
 
 RUN if [ ${INSTALL_YARN} = true ]; then \
         echo '' >> ~/.bashrc && \
-        echo 'export YARN_DIR="/home/$PROJECT_NAME/.yarn"' >> ~/.bashrc && \
+        echo 'export YARN_DIR="/home/$USER/.yarn"' >> ~/.bashrc && \
         echo 'export PATH="$YARN_DIR/bin:$PATH"' >> ~/.bashrc; \
     fi
 
 # Add PATH for YARN
-ENV PATH=$PATH:/home/${PROJECT_NAME}/.yarn/bin
+ENV PATH=$PATH:/home/${USER}/.yarn/bin
 
 #
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

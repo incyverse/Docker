@@ -7,39 +7,7 @@ networks:
     driver: ${NETWORKS_DRIVER}
 
 volumes:
-  cassandra:
-    driver: ${VOLUMES_DRIVER}
   docker-in-docker:
-    driver: ${VOLUMES_DRIVER}
-  elasticsearch:
-    driver: ${VOLUMES_DRIVER}
-  graylog:
-    driver: ${VOLUMES_DRIVER}
-  mariadb:
-    driver: ${VOLUMES_DRIVER}
-  memcached:
-    driver: ${VOLUMES_DRIVER}
-  minio:
-    driver: ${VOLUMES_DRIVER}
-  mongodb:
-    driver: ${VOLUMES_DRIVER}
-  # mosquitto:
-    # driver: ${VOLUMES_DRIVER}
-  mssql:
-    driver: ${VOLUMES_DRIVER}
-  mysql:
-    driver: ${VOLUMES_DRIVER}
-  neo4j:
-    driver: ${VOLUMES_DRIVER}
-  percona:
-    driver: ${VOLUMES_DRIVER}
-  postgres:
-    driver: ${VOLUMES_DRIVER}
-  react:
-    driver: ${VOLUMES_DRIVER}
-  redis:
-    driver: ${VOLUMES_DRIVER}
-  sonarqube:
     driver: ${VOLUMES_DRIVER}
 
 services:
@@ -64,17 +32,18 @@ services:
   #
   workspace:
     container_name: Workspace
+    image: workspace:${ENV_OS}-${OS_VERSION}
     tty: true
     build:
       context: ./workspace
       dockerfile: ${ENV_OS}.Dockerfile
       args:
         - OS_VERSION=${OS_VERSION}
-        - PROJECT_NAME=${PROJECT_NAME}
+        - TZ=${ENV_TIMEZONE}
+        - GROUP=${PROJECT_NAME}
+        - USER=${PROJECT_NAME}
         - PGID=${ENV_PGID}
         - PUID=${ENV_PUID}
-        # - ENV_MODE=${ENV_MODE}
-        - TZ=${ENV_TIMEZONE}
         - NODE_VERSION=${NODE_VERSION}
         - NVM_VERSION=${NVMSH_VERSION}
         - NPM_REGISTRY=${WORKSPACE_NPM_REGISTRY}
@@ -90,6 +59,7 @@ services:
         - INSTALL_PYTHON3=${WORKSPACE_INSTALL_PYTHON3}
         - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
         - INSTALL_SSH=${WORKSPACE_INSTALL_SSH}
+        - INSTALL_SUPERVISOR=${WORKSPACE_INSTALL_SUPERVISOR}
         - http_proxy
         - https_proxy
         - no_proxy
@@ -113,135 +83,13 @@ services:
 
   #
   #───────────────────────────────────────────────────────────────────────────────
-  # CACHE ENGINEs:
-  #───────────────────────────────────────────────────────────────────────────────
-  #
-  #────: Memcached
-  memcached:
-    container_name: Memcached
-    image: memcached
-    build:
-      context: ./cache-engine/memcached
-      args:
-        - MEMCACHED_VERSION=${MEMCACHED_VERSION}
-    volumes:
-      - ${APP_HOST_DATA_PATH}/memcached:/var/lib/memcached
-    ports:
-      - "${MEMCACHED_PORT}:11211"
-    networks:
-      - backend
-    depends_on:
-      - workspace
-
-
-  redis:
-    container_name: Redis
-    image: redis
-    build:
-      context: ./cache/redis
-    volumes:
-      - ${APP_HOST_DATA_PATH}/redis:/data
-    ports:
-      - "${REDIS_PORT}:6379"
-    networks:
-      - backend
-
-  #
-  #───────────────────────────────────────────────────────────────────────────────
-  # CI/CD:
-  #───────────────────────────────────────────────────────────────────────────────
-  #
-  #────: Jenkins
-  jenkins:
-    container_name: Jenkins
-    privileged: true
-    build: 
-      context: ./cicd/jenkins
-    environment:
-      - JAVA_OPTS="-Djava.awt.headless=true"
-    volumes:
-      - ${JENKINS_HOME}:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "${JENKINS_HOST_SLAVE_AGENT_PORT}:50000"
-      - "${JENKINS_HOST_PORT}:8080"
-    networks:
-      - frontend
-      - backend
-
-  teamcity:
-    container_name: TeamCity
-    privileged: true
-    build:
-      context: ./cicd/teamcity
-      args:
-        # - ENV_NAME=${ENV_NAME}
-        - TZ=${ENV_TIMEZONE}
-        - PGID=${ENV_PGID}
-        - PUID=${ENV_PUID}
-        - TEAMCITY_VERSION=${TEAMCITY_VERSION}
-        - TEAMCITY_SERVER_MEM_OPTS=${TEAMCITY_SERVER_MEM_OPTS}
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    volumes:
-      - ${APP_HOST_DATA_PATH}/teamcity/data:/data/teamcity_server/datadir
-      - ${APP_HOST_DATA_PATH}/teamcity/temp:/opt/teamcity/temp
-      - ${APP_HOST_DATA_PATH}/teamcity/logs:/opt/teamcity/logs
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "${TEAMCITY_PORT}:8111"
-    networks:
-      - frontend
-      - backend
-
-  #
-  #───────────────────────────────────────────────────────────────────────────────
   # DATABASE MANAGEMENT SYSTEM:
   #───────────────────────────────────────────────────────────────────────────────
   #
-  #────: MariaDB
-  mariadb:
-    container_name: MariaDB
-    build: 
-      context: ./dbms/mariadb
-      args:
-        - MARIADB_VERSION=${MARIADB_VERSION}
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - TZ=${ENV_TIMEZONE}
-      - MYSQL_DATABASE=${PROJECT_NAME}
-      - MYSQL_USER=${PROJECT_NAME}
-      - MYSQL_PASSWORD=${PROJECT_NAME}${MARIADB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
-    volumes:
-      - ${APP_HOST_DATA_PATH}/mariadb:/var/lib/mysql
-      - ${MARIADB_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
-    ports:
-      - "${MARIADB_PORT}:3306"
-    networks:
-      - backend
-
-  #────: MongoDB
-  mongodb:
-    container_name: MongoDB
-    build: 
-      context: ./dbms/mongodb
-      args:
-        - MONGODB_VERSION=${MONGODB_VERSION}
-    volumes:
-      - ${APP_HOST_DATA_PATH}/mongodb:/data/db
-      - ${APP_HOST_DATA_PATH}/mongodb_config:/data/configdb
-    ports:
-      - "${MONGODB_PORT}:27017"
-    networks:
-      - backend
-
   #────: MSSQL
   mssql:
     container_name: MSSQL
+    image: mssql:${MSSQL_VERSION}
     build:
       context: ./dbms/mssql
       args:
@@ -251,11 +99,10 @@ services:
       - MSSQL_PID=${MSSQL_PID}
       - MSSQL_DATABASE=${MSSQL_DATABASE}
       - MSSQL_COLLATION=${MSSQL_COLLATION}
-      - SA_PASSWORD=${MSSQL_PASSWORD}
+      - SA_PASSWORD=${PROJECT_NAME}${MSSQL_PASSWORD}
       - ACCEPT_EULA=Y
     volumes:
-      - ${APP_HOST_DATA_PATH}/mssql:/var/opt/mssql
-      - mssql:/var/opt/mssql
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/mssql:/var/opt/mssql
     ports:
       - "${MSSQL_PORT}:1433"
     networks:
@@ -263,117 +110,60 @@ services:
 
   #
   #───────────────────────────────────────────────────────────────────────────────
-  # LOG MANAGEMENT:
-  #───────────────────────────────────────────────────────────────────────────────
-  #
-  #────: Graylog
-  graylog:
-    container_name: Graylog
-    user: graylog
-    build: 
-      context: ./log-management/graylog
-      args:
-        - GRAYLOG_VERSION=${GRAYLOG_VERSION}
-    environment:
-      - GRAYLOG_PASSWORD=${GRAYLOG_PASSWORD}
-      - GRAYLOG_ROOT_PASSWORD=${GRAYLOG_SHA256_PASSWORD}
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:${GRAYLOG_PORT}/
-    volumes:
-      - ${APP_HOST_DATA_PATH}/graylog:/usr/share/graylog/data
-    ports:
-      # Graylog web interface and REST API
-      - ${GRAYLOG_PORT}:9000
-      # Syslog TCP
-      - ${GRAYLOG_SYSLOG_TCP_PORT}:514
-      # Syslog UDP
-      - ${GRAYLOG_SYSLOG_UDP_PORT}:514/udp
-      # GELF TCP
-      - ${GRAYLOG_GELF_TCP_PORT}:12201
-      # GELF UDP
-      - ${GRAYLOG_GELF_UDP_PORT}:12201/udp
-    networks:
-      - backend
-    links:
-      - mongodb
-      - elasticsearch
-    depends_on:
-      - mongodb
-      - elasticsearch
-
-  #
-  #───────────────────────────────────────────────────────────────────────────────
-  # SEARCH ENGINEs:
-  #───────────────────────────────────────────────────────────────────────────────
-  #
-  #────: ElasticSearch
-  elasticsearch:
-    container_name: Elasticsearch
-    build: 
-      context: ./search-engine/elasticsearch
-      args:
-        - ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION}
-    environment:
-      - cluster.name=${PROJECT_NAME}-cluster
-      - node.name=${PROJECT_NAME}-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - cluster.initial_master_nodes=${PROJECT_NAME}-node
-    volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    ports:
-      - "${ELASTICSEARCH_HTTP_PORT}:9200"
-      - "${ELASTICSEARCH_TRANSPORT_PORT}:9300"
-    networks:
-      - frontend
-      - backend
-    depends_on:
-      - workspace
-
-  #
-  #───────────────────────────────────────────────────────────────────────────────
   # WEB APPLICATION SERVER:
   #───────────────────────────────────────────────────────────────────────────────
   #
+  #────: Tomcat
   tomcat:
-    container_name: tomcat
+    container_name: Tomcat
     image: tomcat:${TOMCAT_VERSION}
-    # restart: always
+    build: 
+      context: ./app-server/tomcat
+      args:
+        - TOMCAT_VERSION=${TOMCAT_VERSION}
     volumes:
-      - ${APP_HOST_DATA_PATH}/tomcat/webapps:/usr/local/tomcat/webapps
-      - ${APP_HOST_DATA_PATH}/tomcat/logs:/usr/local/tomcat/logs
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/webapps:${TOMCAT_PATH}/webapps
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/logs:${TOMCAT_PATH}/logs
+      - ./conf:${TOMCAT_PATH}/conf2
     ports:
       - "${TOMCAT_HTTP_PORT}:8080"
     networks:
       - frontend
       - backend
-  
+
   #
   #───────────────────────────────────────────────────────────────────────────────
   # WEB SERVER:
   #───────────────────────────────────────────────────────────────────────────────
   #
+  #────: Apache
   apache:
-    container_name: apache2
-    build:
+    container_name: Apache
+    image: apache:${APACHE_VERSION}
+    build: 
       context: ./web-server/apache2
       args:
         - APACHE_VERSION=${APACHE_VERSION}
+        - APACHE_PATH=${APACHE_PATH}
+        - CONNECTOR_VERSION=${TOMCAT_CONNECTOR_VERSION}
         - DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT}
         - INSTALL_HTTP2=${APACHE_INSTALL_HTTP2}
+        - INSTALL_TOMCAT_CONNECTOR=${APACHE_INSTALL_TOMCAT_CONNECTOR}
     volumes:
       - ${APP_HOST_CODE_PATH}:${APP_CONTAINER_CODE_PATH}${APP_CONTAINER_CODE_FLAG}
-      - ${APP_HOST_DATA_PATH}/apache2/logs:/var/log/apache2
-      - ${APACHE_SITES_PATH}:/etc/apache2/sites-available
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/apache/logs:${APACHE_PATH}/logs
+      - ${APACHE_SITES_PATH}:${APACHE_PATH}/conf/sites-available
+      # - ${APACHE_SSL_PATH}:/etc/apache2/ssl
+      # - ./conf/workers.properties:${APACHE_PATH}/conf/workers.properties
+      # - ./conf/mod_jk.conf:${APACHE_PATH}/conf/mod_jk.conf
+      # - ./conf/httpd.conf:${APACHE_PATH}/conf/httpd.conf
     ports:
       - "${WEB_HTTP_PORT}:80"
       - "${WEB_HTTPS_PORT}:443"
     networks:
       - frontend
       - backend
+    links:
+      - tomcat
+    depends_on:
+      - workspace
