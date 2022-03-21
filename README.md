@@ -220,3 +220,6 @@ $ composer require "<package name>"
 $ cat composer.json | grep "<package name>"
 $ composer remove "<package name>"
 ```
+
+# PostgreSQL
+entrypoint files `chmod -R 755`

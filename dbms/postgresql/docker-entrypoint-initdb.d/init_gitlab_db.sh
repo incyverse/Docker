@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 #
 # Copy createdb.sh.example to createdb.sh
 # then uncomment then set database name and username to create you need databases
@@ -31,3 +33,14 @@
 #     CREATE DATABASE db3;
 #     GRANT ALL PRIVILEGES ON DATABASE db3 TO db3;
 # EOSQL
+# 
+### default database and user for gitlab ##############################################
+# if [ "$GITLAB_POSTGRESQL_INIT" == 'true' ]; then
+	# psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+# 		CREATE USER $GITLAB_POSTGRES_USER WITH PASSWORD '$GITLAB_POSTGRES_PASSWORD';
+# 		CREATE DATABASE $GITLAB_POSTGRES_DB;
+# 		GRANT ALL PRIVILEGES ON DATABASE $GITLAB_POSTGRES_DB TO $GITLAB_POSTGRES_USER;
+# 		ALTER ROLE $GITLAB_POSTGRES_USER CREATEROLE SUPERUSER;
+	# EOSQL
+# 	echo
+# fi
