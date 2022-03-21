@@ -9,8 +9,6 @@ networks:
 volumes:
   docker-in-docker:
     driver: ${VOLUMES_DRIVER}
-  postgres:
-    driver: ${VOLUMES_DRIVER}
 
 services:
   docker-in-docker:
