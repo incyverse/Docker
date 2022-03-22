@@ -39,6 +39,8 @@ services:
       dockerfile: ${ENV_OS}.Dockerfile
       args:
         - OS_VERSION=${OS_VERSION}
+        - LOCALE=${ENV_LOCALE}
+        - LANG=${ENV_LANG}
         - TZ=${ENV_TIMEZONE}
         - GROUP=${PROJECT_NAME}
         - USER=${PROJECT_NAME}
@@ -95,8 +97,10 @@ services:
       context: ./dbms/mssql
       args:
         - MSSQL_VERSION=${MSSQL_VERSION}
+        - LOCALE=${ENV_LOCALE}
+        - LANG=${ENV_LANG}
+        - TZ=${ENV_TIMEZONE}
     environment:
-      - TZ=${ENV_TIMEZONE}
       - MSSQL_PID=${MSSQL_PID}
       - MSSQL_DATABASE=${MSSQL_DATABASE}
       - MSSQL_COLLATION=${MSSQL_COLLATION}
@@ -117,8 +121,10 @@ services:
       context: ./dbms/postgresql
       args:
         - POSTGRESQL_VERSION=${POSTGRESQL_VERSION}
+        - LOCALE=${ENV_LOCALE}
+        - LANG=${ENV_LANG}
+        - TZ=${ENV_TIMEZONE}
     environment:
-      - TZ=${ENV_TIMEZONE}
       - POSTGRES_DB=${POSTGRESQL_DATABASE}
       - POSTGRES_USER=${POSTGRESQL_USER}
       - POSTGRES_PASSWORD=${PROJECT_NAME}${POSTGRESQL_PASSWORD}
@@ -146,6 +152,9 @@ services:
       context: ./app-server/tomcat
       args:
         - TOMCAT_VERSION=${TOMCAT_VERSION}
+        - LOCALE=${ENV_LOCALE}
+        - LANG=${ENV_LANG}
+        - TZ=${ENV_TIMEZONE}
     volumes:
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/webapps:${TOMCAT_PATH}/webapps
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/tomcat/logs:${TOMCAT_PATH}/logs
@@ -170,6 +179,9 @@ services:
       args:
         - APACHE_VERSION=${APACHE_VERSION}
         - APACHE_PATH=${APACHE_PATH}
+        - LOCALE=${ENV_LOCALE}
+        - LANG=${ENV_LANG}
+        - TZ=${ENV_TIMEZONE}
         - CONNECTOR_VERSION=${TOMCAT_CONNECTOR_VERSION}
         - DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT}
         - INSTALL_HTTP2=${APACHE_INSTALL_HTTP2}

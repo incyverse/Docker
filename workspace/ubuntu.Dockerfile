@@ -44,8 +44,9 @@ RUN set -xe; \
 # Set timezone
 ARG TZ=UTC
 ENV TZ=${TZ}
-
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN mv /etc/localtime /etc/localtime_UTC && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 # User aliases
 COPY ./aliases.sh /root/aliases.sh

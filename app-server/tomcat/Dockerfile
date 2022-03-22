@@ -17,13 +17,16 @@ RUN set -xe; \
         vim && \
     apt-get clean
 
+ARG TZ=UTC
+ENV TZ=${TZ}
+RUN mv /etc/localtime /etc/localtime_UTC && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV CATALINA_BASE=/usr/local/tomcat
 
 ADD setenv.sh /usr/local/tomcat/bin
-
-RUN mv /etc/localtime /etc/localtime_UTC && \
-    ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
 RUN rm -rf /usr/local/tomcat/webapps/*
 

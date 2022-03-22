@@ -22,8 +22,11 @@ RUN set -xe; \
         vim && \
     apt-get clean
 
+ARG TZ=UTC
+ENV TZ=${TZ}
 RUN mv /etc/localtime /etc/localtime_UTC && \
-    ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 #
 #───────────────────────────────────────────────────────────────────────────────
