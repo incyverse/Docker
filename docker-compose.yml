@@ -189,7 +189,6 @@ services:
     volumes:
       - ${APP_HOST_CODE_PATH}:${APP_CONTAINER_CODE_PATH}${APP_CONTAINER_CODE_FLAG}
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/apache/logs:${APACHE_PATH}/logs
-      - ${APACHE_SITES_PATH}:${APACHE_PATH}/conf/sites-available
       # - ${APACHE_SSL_PATH}:/etc/apache2/ssl
       - ./web-server/apache2/conf:${APACHE_PATH}/conf
     ports:

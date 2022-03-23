@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/mssql/server:${MSSQL_VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
+USER root
+
 ARG TZ=UTC
 ENV TZ=${TZ}
 RUN mv /etc/localtime /etc/localtime_UTC && \
