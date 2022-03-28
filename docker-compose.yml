@@ -197,7 +197,5 @@ services:
     networks:
       - frontend
       - backend
-    links:
-      - tomcat
     depends_on:
       - workspace
