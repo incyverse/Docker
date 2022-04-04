@@ -28,17 +28,15 @@ ENV CATALINA_BASE=/usr/local/tomcat
 
 ADD setenv.sh /usr/local/tomcat/bin
 
+# ARG PROJECT_NAME
+
 RUN rm -rf /usr/local/tomcat/webapps/*
+# COPY ./${PROJECT_NAME}.war /usr/local/tomcat/webapps/ROOT.war
 
 ENTRYPOINT [ "/usr/local/tomcat/bin/catalina.sh", "run" ]
 
-# ARG PROJECT_NAME
+WORKDIR /usr/local/tomcat
 
-# RUN rm -rf /usr/local/tomcat/webapps/*
-# COPY ./${PROJECT_NAME}.war /usr/local/tomcat/webapps/ROOT.war
-
-# WORKDIR /usr/local/tomcat
-
-# CMD [ "catalina.sh", "run" ]
+CMD [ "catalina.sh", "run" ]
 
 EXPOSE 8009

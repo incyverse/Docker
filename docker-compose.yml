@@ -12,7 +12,7 @@ volumes:
 
 services:
   docker-in-docker:
-    container_name: DinD
+    # container_name: DinD
     image: docker:20.10-dind
     privileged: true
     environment:
@@ -31,7 +31,7 @@ services:
   #───────────────────────────────────────────────────────────────────────────────
   #
   workspace:
-    container_name: Workspace
+    # container_name: ${PROJECT_NAME}-workspace
     image: workspace:${ENV_OS}-${OS_VERSION}
     tty: true
     build:
@@ -62,6 +62,7 @@ services:
         - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
         - INSTALL_SSH=${WORKSPACE_INSTALL_SSH}
         - INSTALL_SUPERVISOR=${WORKSPACE_INSTALL_SUPERVISOR}
+        - INSTALL_OH_MY_ZSH=${SHELL_OH_MY_ZSH}
         - http_proxy
         - https_proxy
         - no_proxy
@@ -77,12 +78,47 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - "${SSH_PORT}:22"
-      - "3000:3000"
+      - "${REACT_SERVE_PORT}:3000"
+      - "${REACT_UI_PORT}:3001"
     networks:
       - frontend
       - backend
     links:
       - docker-in-docker
+  
+  #
+  #───────────────────────────────────────────────────────────────────────────────
+  # CACHE ENGINEs:
+  #───────────────────────────────────────────────────────────────────────────────
+  #
+  #────: Redis
+  redis:
+    # container_name: Redis
+    image: redis:${REDIS_VERSION}
+    build: 
+      context: ./cache-engine/redis
+    volumes:
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/redis/data:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - backend
+  
+  redis-webui:
+    # container_name: Redis-WebUI
+    build: 
+      context: ./cache-engine/redis-webui
+    environment:
+      - ADMIN_USER=${REDIS_WEBUI_USERNAME}
+      - ADMIN_PASS=${REDIS_WEBUI_PASSWORD}
+      - REDIS_1_HOST=${REDIS_WEBUI_CONNECT_HOST}
+      - REDIS_1_PORT=${REDIS_WEBUI_CONNECT_PORT}
+    ports:
+      - "${REDIS_WEBUI_PORT}:80"
+    networks:
+      - backend
+    depends_on:
+      - redis
 
   #
   #───────────────────────────────────────────────────────────────────────────────
@@ -91,7 +127,7 @@ services:
   #
   #────: MSSQL
   mssql:
-    container_name: MSSQL
+    # container_name: MSSQL
     image: mssql:${MSSQL_VERSION}
     build:
       context: ./dbms/mssql
@@ -115,7 +151,7 @@ services:
   
   #────: PostgreSQL
   postgres:
-    container_name: PostgreSQL
+    # container_name: PostgreSQL
     image: postgres:${POSTGRESQL_VERSION}
     build: 
       context: ./dbms/postgresql
@@ -146,7 +182,7 @@ services:
   #
   #────: Tomcat
   tomcat:
-    container_name: Tomcat
+    # container_name: Tomcat
     image: tomcat:${TOMCAT_VERSION}
     build: 
       context: ./app-server/tomcat
@@ -172,7 +208,7 @@ services:
   #
   #────: Apache
   apache:
-    container_name: Apache
+    # container_name: Apache
     image: apache:${APACHE_VERSION}
     build: 
       context: ./web-server/apache2
