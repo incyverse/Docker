@@ -119,6 +119,41 @@ services:
       - backend
     depends_on:
       - redis
+  
+  #
+  #───────────────────────────────────────────────────────────────────────────────
+  # CI/CD:
+  #───────────────────────────────────────────────────────────────────────────────
+  #
+  #────: Swagger
+  swagger-editor:
+    # container_name: Swagger-Editor
+    image: swagger/editor:${SWAGGER_EDITOR_VERSION}
+    build: 
+      context: ./cicd/swagger
+      dockerfile: editor.Dockerfile
+      args:
+        - VERSION=${SWAGGER_EDITOR_VERSION}
+    ports:
+      - ${SWAGGER_EDITOR_PORT}:8080
+    networks:
+      - backend
+  
+  swagger-ui:
+    # container_name: Swagger-UI
+    image: swagger/ui:${SWAGGER_UI_VERSION}
+    build: 
+      context: ./cicd/swagger
+      dockerfile: ui.Dockerfile
+      args:
+        - VERSION=${SWAGGER_UI_VERSION}
+    environment:
+      - API_URL=${SWAGGER_API_URL}
+    ports:
+      - ${SWAGGER_UI_PORT}:8080
+    networks:
+      - backend
+
 
   #
   #───────────────────────────────────────────────────────────────────────────────
