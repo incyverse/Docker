@@ -3,8 +3,8 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG POSTGRESQL_VERSION
-FROM postgres:${POSTGRESQL_VERSION}
+ARG VERSION=latest
+FROM postgres:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 

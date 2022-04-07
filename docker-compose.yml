@@ -193,7 +193,7 @@ services:
     build: 
       context: ./dbms/postgresql
       args:
-        - POSTGRESQL_VERSION=${POSTGRESQL_VERSION}
+        - VERSION=${POSTGRESQL_VERSION}
         - LOCALE=${ENV_LOCALE}
         - LANG=${ENV_LANG}
         - TZ=${ENV_TIMEZONE}
