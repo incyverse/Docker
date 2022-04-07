@@ -3,7 +3,7 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG VERSION
+ARG VERSION=latest
 FROM swaggerapi/swagger-ui:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"

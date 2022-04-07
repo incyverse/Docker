@@ -3,8 +3,8 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG REDIS_VERSION=latest
-FROM redis:${REDIS_VERSION}
+ARG VERSION=latest
+FROM redis:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 

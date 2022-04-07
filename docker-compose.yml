@@ -97,6 +97,8 @@ services:
     image: redis:${REDIS_VERSION}
     build: 
       context: ./cache-engine/redis
+      args:
+        - VERSION=${REDIS_VERSION}
     volumes:
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/redis/data:/data
     ports:
