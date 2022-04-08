@@ -3,8 +3,8 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG APACHE_VERSION=latest
-FROM httpd:${APACHE_VERSION}
+ARG VERSION=latest
+FROM httpd:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 

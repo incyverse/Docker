@@ -3,8 +3,8 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG MSSQL_VERSION
-FROM mcr.microsoft.com/mssql/server:${MSSQL_VERSION}
+ARG VERSION
+FROM mcr.microsoft.com/mssql/server:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 

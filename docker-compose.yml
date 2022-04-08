@@ -9,6 +9,8 @@ networks:
 volumes:
   docker-in-docker:
     driver: ${VOLUMES_DRIVER}
+  postgres:
+    driver: ${VOLUMES_DRIVER}
 
 services:
   docker-in-docker:
@@ -169,7 +171,7 @@ services:
     build:
       context: ./dbms/mssql
       args:
-        - MSSQL_VERSION=${MSSQL_VERSION}
+        - VERSION=${MSSQL_VERSION}
         - LOCALE=${ENV_LOCALE}
         - LANG=${ENV_LANG}
         - TZ=${ENV_TIMEZONE}
@@ -188,7 +190,7 @@ services:
   
   #────: PostgreSQL
   postgres:
-    # container_name: PostgreSQL
+    container_name: PostgreSQL
     image: postgres:${POSTGRESQL_VERSION}
     build: 
       context: ./dbms/postgresql
@@ -205,7 +207,8 @@ services:
       - GITLAB_POSTGRESQL_INIT=${GITLAB_POSTGRESQL_INIT}
       - TEAMCITY_POSTGRESQL_INIT=${TEAMCITY_POSTGRESQL_INIT}
     volumes:
-      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/postgresql:/var/lib/postgresql/data
+      # - ${APP_HOST_STORAGE}/${PROJECT_NAME}/postgres/data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
       - ${POSTGRESQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
     ports:
       - "${POSTGRESQL_PORT}:5432"
@@ -224,7 +227,7 @@ services:
     build: 
       context: ./app-server/tomcat
       args:
-        - TOMCAT_VERSION=${TOMCAT_VERSION}
+        - VERSION=${TOMCAT_VERSION}
         - LOCALE=${ENV_LOCALE}
         - LANG=${ENV_LANG}
         - TZ=${ENV_TIMEZONE}
@@ -250,7 +253,7 @@ services:
     build: 
       context: ./web-server/apache2
       args:
-        - APACHE_VERSION=${APACHE_VERSION}
+        - VERSION=${APACHE_VERSION}
         - APACHE_PATH=${APACHE_PATH}
         - LOCALE=${ENV_LOCALE}
         - LANG=${ENV_LANG}
@@ -270,5 +273,5 @@ services:
     networks:
       - frontend
       - backend
-    depends_on:
-      - workspace
+    # depends_on:
+      # - workspace

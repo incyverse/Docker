@@ -3,8 +3,8 @@
 #━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG TOMCAT_VERSION
-FROM tomcat:${TOMCAT_VERSION}
+ARG VERSION
+FROM tomcat:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
