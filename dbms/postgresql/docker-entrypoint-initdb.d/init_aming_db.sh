@@ -5,16 +5,16 @@ set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
 	SET TIMEZONE TO '$TZ';
 	REVOKE ALL ON DATABASE postgres FROM PUBLIC;
-	CREATE USER aming WITH PASSWORD 'aming(!)2022';
-	CREATE DATABASE aming WITH OWNER aming;
-	GRANT ALL PRIVILEGES ON DATABASE aming TO aming;
-	GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aming;
+	CREATE USER ngs WITH PASSWORD 'ngs(!)2022';
+	CREATE DATABASE ngs WITH OWNER ngs;
+	GRANT ALL PRIVILEGES ON DATABASE ngs TO ngs;
+	GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ngs;
 EOSQL
 
-psql -v ON_ERROR_STOP=1 --username "aming" --dbname "aming" <<-EOSQL
-	REVOKE ALL ON DATABASE aming FROM PUBLIC;
-	CREATE SCHEMA aming AUTHORIZATION aming;
-	ALTER USER aming SET search_path=public,aming;
+psql -v ON_ERROR_STOP=1 --username "ngs" --dbname "ngs" <<-EOSQL
+	REVOKE ALL ON DATABASE ngs FROM PUBLIC;
+	CREATE SCHEMA aming AUTHORIZATION ngs;
+	ALTER USER ngs SET search_path=public,ngs;
 EOSQL
 
 # -- 시퀀스 초기화
@@ -80,21 +80,21 @@ EOSQL
 # 사용자 테이블
 # -- CREATE SEQUENCE IF NOT EXISTS users_code_seq INCREMENT 1 MINVALUE 0000 START WITH 0001;
 # -- SELECT CONCAT('U', TO_CHAR(created_date, 'YYYYMM'), REGEXP_REPLACE(code, '^\s+', '')) AS code, * FROM users;
-psql -v ON_ERROR_STOP=1 --username "aming" --dbname "aming" <<-EOSQL
-	DROP SEQUENCE IF EXISTS users_code_seq CASCADE;
-	CREATE SEQUENCE IF NOT EXISTS users_code_seq INCREMENT 1 MINVALUE 1 MAXVALUE 999 CYCLE;
-	ALTER SEQUENCE IF EXISTS users_code_seq OWNER TO aming;
-	GRANT ALL ON SEQUENCE users_code_seq TO aming;
-	SELECT SETVAL('users_code_seq', 1, FALSE);
+psql -v ON_ERROR_STOP=1 --username "ngs" --dbname "ngs" <<-EOSQL
+	DROP SEQUENCE IF EXISTS aming.users_code_seq CASCADE;
+	CREATE SEQUENCE IF NOT EXISTS aming.users_code_seq INCREMENT 1 MINVALUE 1 MAXVALUE 999999 CYCLE;
+	ALTER SEQUENCE IF EXISTS aming.users_code_seq OWNER TO ngs;
+	GRANT ALL ON SEQUENCE aming.users_code_seq TO ngs;
+	SELECT SETVAL('aming.users_code_seq', 1, FALSE);
 
 	DROP TABLE IF EXISTS aming.users, aming.user_meta CASCADE;
 	CREATE TABLE IF NOT EXISTS aming.users
 	(
 		id            BIGSERIAL,
-		code          CHAR(3)                  DEFAULT TO_CHAR(NEXTVAL('users_code_seq'::regclass), 'FM000') NOT NULL,
+		code          CHAR(6)                  DEFAULT TO_CHAR(NEXTVAL('aming.users_code_seq'::regclass), 'FM000000') NOT NULL,
 		avatar        VARCHAR(200),
 		login         VARCHAR(50)                                                                            NOT NULL,
-		pass          VARCHAR(50)                                                                            NOT NULL,
+		pass          VARCHAR(200)                                                                            NOT NULL,
 		name          VARCHAR(20)                                                                            NOT NULL,
 		email         VARCHAR(50),
 		contact       VARCHAR(20),
@@ -115,14 +115,14 @@ psql -v ON_ERROR_STOP=1 --username "aming" --dbname "aming" <<-EOSQL
 	COMMENT ON COLUMN aming.users.name IS '사용자 이름';
 	COMMENT ON COLUMN aming.users.email IS '사용자 이메일';
 	COMMENT ON COLUMN aming.users.contact IS '사용자 연락처';
-	ALTER TABLE aming.users OWNER TO aming;
-	GRANT ALL ON aming.users TO aming;
+	ALTER TABLE aming.users OWNER TO ngs;
+	GRANT ALL ON aming.users TO ngs;
 	CREATE UNIQUE INDEX IF NOT EXISTS users_udx ON aming.users (login);
 	CREATE INDEX IF NOT EXISTS users_idx ON aming.users (name);
 EOSQL
 
 # 사용자 메타 테이블
-psql -v ON_ERROR_STOP=1 --username "aming" --dbname "aming" <<-EOSQL
+psql -v ON_ERROR_STOP=1 --username "ngs" --dbname "ngs" <<-EOSQL
 	CREATE TABLE IF NOT EXISTS aming.user_meta
 	(
 		id         BIGSERIAL,
@@ -133,7 +133,7 @@ psql -v ON_ERROR_STOP=1 --username "aming" --dbname "aming" <<-EOSQL
 		CONSTRAINT user_meta_users_id_fk FOREIGN KEY (user_id) REFERENCES aming.users (id)
 	);
 	COMMENT ON TABLE aming.user_meta IS '사용자 메타 정보';
-	ALTER TABLE aming.user_meta OWNER TO aming;
-	GRANT ALL ON aming.user_meta TO aming;
+	ALTER TABLE aming.user_meta OWNER TO ngs;
+	GRANT ALL ON aming.user_meta TO ngs;
 	CREATE INDEX IF NOT EXISTS user_meta_idx ON aming.user_meta (meta_key, meta_value);
 EOSQL

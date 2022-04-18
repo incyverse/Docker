@@ -228,22 +228,6 @@ COPY ./.npmrc /home/${USER}/.npmrc
 
 #
 #───────────────────────────────────────────────────────────────────────────────
-# Oh My ZSH:
-#───────────────────────────────────────────────────────────────────────────────
-#
-#────:
-USER root
-
-ARG SHELL_OH_MY_ZSH=false
-ARG SHELL_OH_MY_ZSH_AUTOSUGESTIONS=false
-ARG SHELL_OH_MY_ZSH_HIGHLIGHTING=false
-
-RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
-        apt install -y zsh; \
-    fi
-
-#
-#───────────────────────────────────────────────────────────────────────────────
 # Python3:
 #───────────────────────────────────────────────────────────────────────────────
 #
@@ -340,14 +324,17 @@ ENV PATH=$PATH:/home/${USER}/.yarn/bin
 
 #
 #───────────────────────────────────────────────────────────────────────────────
-# Oh My ZSH!:
+# Oh My ZSH:
 #───────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
 
-ARG INSTALL_OH_MY_ZSH=false
-RUN if [ ${INSTALL_OH_MY_ZSH} = true ]; then \
+ARG SHELL_OH_MY_ZSH=false
+ARG SHELL_OH_MY_ZSH_AUTOSUGESTIONS=false
+ARG SHELL_OH_MY_ZSH_HIGHLIGHTING=false
+
+RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
         apt install -y zsh; \
     fi
 

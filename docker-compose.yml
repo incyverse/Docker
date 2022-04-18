@@ -38,7 +38,7 @@ services:
     tty: true
     build:
       context: ./workspace
-      dockerfile: ${ENV_OS}.Dockerfile
+      dockerfile: ${ENV_OS}.${ENV_PROFILE}.Dockerfile
       args:
         - OS_VERSION=${OS_VERSION}
         - LOCALE=${ENV_LOCALE}
@@ -48,6 +48,7 @@ services:
         - USER=${PROJECT_NAME}
         - PGID=${ENV_PGID}
         - PUID=${ENV_PUID}
+        - CHOKIDAR_USEPOLLING=true
         - NODE_VERSION=${NODE_VERSION}
         - NVM_VERSION=${NVMSH_VERSION}
         - NPM_REGISTRY=${WORKSPACE_NPM_REGISTRY}
