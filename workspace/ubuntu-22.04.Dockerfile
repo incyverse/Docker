@@ -1,44 +1,72 @@
 #
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#   WORKSPACE IMAGE SETUP
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-FROM incyverse/workspace:ubuntu-20.04
+FROM phusion/baseimage:focal-1.2.0
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
-ARG GROUP
-ARG USER
-
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN locale-gen en_US.UTF-8
+
+ENV LANGUAGE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LC_CTYPE=en_US.UTF-8
+ENV TERM=xterm
 
 # Start as root
 #────:
 USER root
 
 # Add a non-root user to prevent files being created with root permission on host machine.
+ARG GROUP
 ARG PGID=1000
 ENV PGID=${PGID}
+ARG USER
 ARG PUID=1000
 ENV PUID=${PUID}
 
 #
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━OPTIONAL SOFTWARE's INSTALLATION━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#   OPTIONAL SOFTWARE`S INSTALLATION
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # Always run apt update when start and after add new source list, then clean up at end.
-RUN set -xe; \
+RUN set -eux; \
     apt-get update -yqq && \
     groupadd -g ${PGID} ${GROUP} && \
     useradd -l -u ${PUID} -g ${USER} -m ${USER} -G docker_env && \
     usermod -p '*' ${USER} -s /bin/bash && \
-    apt-get install -yqq \
+    apt-get update -yqq && \
+    apt-get upgrade -yqq && \
+    apt-get install -yqq --allow-downgrades --allow-remove-essential --allow-change-held-packages \
         apt-utils \
+        autoconf \
+        curl \
+        file \
+        g++ \
+        git \
+        gnupg \
+        htop \
+        iputils-ping \
+        libcurl4-openssl-dev \
+        libedit-dev \
+        libssl-dev \
+        libxml2-dev \
         libzip-dev \
         nasm \
+        net-tools \
+        ntp \
+        sudo \
+        tree \
         unzip \
+        vim \
+        wget \
+        xz-utils \
         zip
 
 # Set timezone
@@ -67,24 +95,24 @@ RUN echo '' >> ~/.bashrc && \
     echo 'source ~/aliases.sh' >> ~/.bashrc
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Crontab:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   CRONTAB:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
 
-# COPY ./cron.d /etc/cron.d
+COPY ./crontab /etc/cron.d
 
-# RUN chmod -R 644 /etc/cron.d
+RUN chmod -R 644 /etc/cron.d
 
 # Update Repositories
 RUN apt-get update -yqq
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Git:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   GIT:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -100,9 +128,9 @@ RUN if [ ${INSTALL_GIT_PROMPT} = true ]; then \
     fi
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# LinuxBrew:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   LINUXBREW:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -113,17 +141,14 @@ RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
         # Preparation
         apt-get upgrade -y && \
         apt-get install -y \
-            autoconf \
             autoconf-archive \
             automake \
             bison \
             build-essential \
             cmake \
-            curl \
             flex \
             gettext \
             libbz2-dev \
-            libcurl4-openssl-dev \
             libexpat-dev \
             libncurses-dev \
             libtool \
@@ -143,9 +168,9 @@ RUN if [ ${INSTALL_LINUXBREW} = true ]; then \
     fi
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Node:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   NODE:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER ${USER}
@@ -154,18 +179,23 @@ USER ${USER}
 ARG NODE_VERSION=node
 ENV NODE_VERSION=${NODE_VERSION}
 ARG NPM_FETCH_RETRIES
+ENV NPM_FETCH_RETRIES=${NPM_FETCH_RETRIES}
 ARG NPM_FETCH_RETRY_FACTOR
+ENV NPM_FETCH_RETRY_FACTOR=${NPM_FETCH_RETRY_FACTOR}
 ARG NPM_FETCH_RETRY_MINTIMEOUT
+ENV NPM_FETCH_RETRY_MINTIMEOUT=${NPM_FETCH_RETRY_MINTIMEOUT}
 ARG NPM_FETCH_RETRY_MAXTIMEOUT
+ENV NPM_FETCH_RETRY_MAXTIMEOUT=${NPM_FETCH_RETRY_MAXTIMEOUT}
 ARG NPM_REGISTRY
+ENV NPM_REGISTRY=${NPM_REGISTRY}
 
 ARG NVM_VERSION
+ENV NVM_VERSION=${NVM_VERSION}
+ENV NVM_DIR=/home/${USER}/.nvm
 ARG NVM_NODEJS_ORG_MIRROR
 ENV NVM_NODEJS_ORG_MIRROR=${NVM_NODEJS_ORG_MIRROR}
 
 ARG INSTALL_NODE=false
-
-ENV NVM_DIR=/home/${USER}/.nvm
 
 RUN if [ ${INSTALL_NODE} = true ]; then \
         # Install nvm (A Node Version Manager)
@@ -227,9 +257,9 @@ COPY ./.npmrc /root/.npmrc
 COPY ./.npmrc /home/${USER}/.npmrc
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Python3:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   PYTHON3:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -243,9 +273,9 @@ RUN if [ ${INSTALL_PYTHON3} = true ]; then \
     fi
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# ssh:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   SSH:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -268,9 +298,9 @@ RUN if [ ${INSTALL_SSH} = true ]; then \
     fi
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Supervisor:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   SUPERVISOR:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -287,9 +317,9 @@ RUN if [ ${INSTALL_SUPERVISOR} = true ]; then \
     fi
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Yarn:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   YARN:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER ${USER}
@@ -297,6 +327,7 @@ USER ${USER}
 ARG INSTALL_YARN=false
 ARG YARN_VERSION=latest
 ENV YARN_VERSION=${YARN_VERSION}
+ENV YARN_DIR=/home/${USER}/.yarn
 
 RUN if [ ${INSTALL_YARN} = true ]; then \
         [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && \
@@ -323,9 +354,9 @@ RUN if [ ${INSTALL_YARN} = true ]; then \
 ENV PATH=$PATH:/home/${USER}/.yarn/bin
 
 #
-#───────────────────────────────────────────────────────────────────────────────
-# Oh My ZSH:
-#───────────────────────────────────────────────────────────────────────────────
+#────────────────────────────────────────────────────────────────────────────────────────────────────
+#   Oh My ZSH!:
+#────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 #────:
 USER root
@@ -367,9 +398,9 @@ USER ${USER}
     # fi
 
 #
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━FINAL TOUCH━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#   FINAL TOUCH
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 #────:
 USER root

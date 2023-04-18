@@ -18,3 +18,24 @@ else # macOS `ls`
 	colorflag="-G"
 	export LSCOLORS='BxBxhxDxfxhxhxhxhxcxcx'
 fi
+
+# List all files colorized in long format
+### MEGA: I want l and la ti return hidden files
+alias l="ls -laF ${colorflag}"
+
+# List all files colorized in long format, including dot files
+alias la="ls -laF ${colorflag}"
+
+# List only directories
+alias lsd="ls -lF ${colorflag} | grep --color=never '^d'"
+
+# Always use color output for `ls`
+alias ls="command ls ${colorflag}"
+
+# Commonly used aliases
+alias ..="cd .."
+alias ....="cd ../.."
+alias ......="cd ../../.."
+# `cd` is probably faster to type though
+alias ~="cd ~"
+alias home="cd ~"

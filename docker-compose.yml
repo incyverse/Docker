@@ -11,10 +11,11 @@ volumes:
     driver: ${VOLUMES_DRIVER}
   postgres:
     driver: ${VOLUMES_DRIVER}
+  redis:
+    driver: ${VOLUMES_DRIVER}
 
 services:
   docker-in-docker:
-    # container_name: DinD
     image: docker:20.10-dind
     privileged: true
     environment:
@@ -28,17 +29,18 @@ services:
       - backend
 
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # WORKSPACE:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   WORKSPACE:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   workspace:
-    # container_name: ${PROJECT_NAME}-workspace
-    image: workspace:${ENV_OS}-${OS_VERSION}
+    container_name: ${PROJECT_NAME}.workspace
+    image: workspace:${ENV_OS}-${ENV_OS_VERSION}
+    privileged: true
     tty: true
     build:
       context: ./workspace
-      dockerfile: ${ENV_OS}.${ENV_PROFILE}.Dockerfile
+      dockerfile: ${ENV_OS}-${ENV_OS_VERSION}.Dockerfile
       args:
         - OS_VERSION=${OS_VERSION}
         - LOCALE=${ENV_LOCALE}
@@ -49,23 +51,24 @@ services:
         - PGID=${ENV_PGID}
         - PUID=${ENV_PUID}
         - CHOKIDAR_USEPOLLING=true
-        - NODE_VERSION=${NODE_VERSION}
-        - NVM_VERSION=${NVMSH_VERSION}
         - NPM_REGISTRY=${WORKSPACE_NPM_REGISTRY}
         - NPM_FETCH_RETRIES=${WORKSPACE_NPM_FETCH_RETRIES}
         - NPM_FETCH_RETRY_FACTOR=${WORKSPACE_NPM_FETCH_RETRY_FACTOR}
         - NPM_FETCH_RETRY_MINTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MINTIMEOUT}
         - NPM_FETCH_RETRY_MAXTIMEOUT=${WORKSPACE_NPM_FETCH_RETRY_MAXTIMEOUT}
         - NVM_NODEJS_ORG_MIRROR=${WORKSPACE_NVM_NODEJS_ORG_MIRROR}
+        - NODE_VERSION=${NODE_VERSION}
+        - NVM_VERSION=${NVM_VERSION}
         - YARN_VERSION=${YARN_VERSION}
         - INSTALL_GIT_PROMPT=${WORKSPACE_INSTALL_GIT_PROMPT}
         - INSTALL_LINUXBREW=${WORKSPACE_INSTALL_LINUXBREW}
         - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
+        - INSTALL_OH_MY_ZSH=${SHELL_OH_MY_ZSH}
+        - INSTALL_PM2=${WORKSPACE_INSTALL_PM2}
         - INSTALL_PYTHON3=${WORKSPACE_INSTALL_PYTHON3}
         - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
         - INSTALL_SSH=${WORKSPACE_INSTALL_SSH}
         - INSTALL_SUPERVISOR=${WORKSPACE_INSTALL_SUPERVISOR}
-        - INSTALL_OH_MY_ZSH=${SHELL_OH_MY_ZSH}
         - http_proxy
         - https_proxy
         - no_proxy
@@ -81,8 +84,6 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - "${SSH_PORT}:22"
-      - "${REACT_SERVE_PORT}:3000"
-      - "${REACT_UI_PORT}:3001"
     networks:
       - frontend
       - backend
@@ -90,16 +91,16 @@ services:
       - docker-in-docker
   
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # CACHE ENGINEs:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   CACHE ENGINES:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   #────: Redis
   redis:
-    # container_name: Redis
+    container_name: ${PROJECT_NAME}.redis
     image: redis:${REDIS_VERSION}
     build: 
-      context: ./cache-engine/redis
+      context: ./cache-engines/redis
       args:
         - VERSION=${REDIS_VERSION}
     volumes:
@@ -110,9 +111,9 @@ services:
       - backend
   
   redis-webui:
-    # container_name: Redis-WebUI
+    container_name: ${PROJECT_NAME}.redis-webui
     build: 
-      context: ./cache-engine/redis-webui
+      context: ./cache-engines/redis-webui
     environment:
       - ADMIN_USER=${REDIS_WEBUI_USERNAME}
       - ADMIN_PASS=${REDIS_WEBUI_PASSWORD}
@@ -126,9 +127,9 @@ services:
       - redis
   
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # CI/CD:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   DEVOPS:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   #────: Swagger
   swagger-editor:
@@ -159,15 +160,14 @@ services:
     networks:
       - backend
 
-
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # DATABASE MANAGEMENT SYSTEM:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   DATABASE MANAGEMENT SYSTEMS:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   #────: MSSQL
   mssql:
-    # container_name: MSSQL
+    container_name: ${PROJECT_NAME}.mssql
     image: mssql:${MSSQL_VERSION}
     build:
       context: ./dbms/mssql
@@ -191,7 +191,7 @@ services:
   
   #────: PostgreSQL
   postgres:
-    container_name: PostgreSQL
+    container_name: ${PROJECT_NAME}.postgres
     image: postgres:${POSTGRESQL_VERSION}
     build: 
       context: ./dbms/postgresql
@@ -208,22 +208,22 @@ services:
       - GITLAB_POSTGRESQL_INIT=${GITLAB_POSTGRESQL_INIT}
       - TEAMCITY_POSTGRESQL_INIT=${TEAMCITY_POSTGRESQL_INIT}
     volumes:
-      # - ${APP_HOST_STORAGE}/${PROJECT_NAME}/postgres/data:/var/lib/postgresql/data
-      - postgres:/var/lib/postgresql/data
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/postgres/data:/var/lib/postgresql/data
       - ${POSTGRESQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      - postgres:/var/lib/postgresql/data
     ports:
       - "${POSTGRESQL_PORT}:5432"
     networks:
       - backend
 
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # WEB APPLICATION SERVER:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   WEB APPLICATION SERVERS:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   #────: Tomcat
   tomcat:
-    # container_name: Tomcat
+    container_name: ${PROJECT_NAME}.tomcat
     image: tomcat:${TOMCAT_VERSION}
     build: 
       context: ./app-server/tomcat
@@ -243,9 +243,9 @@ services:
       - backend
 
   #
-  #───────────────────────────────────────────────────────────────────────────────
-  # WEB SERVER:
-  #───────────────────────────────────────────────────────────────────────────────
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
+  #   WEB SERVERS:
+  #────────────────────────────────────────────────────────────────────────────────────────────────────
   #
   #────: Apache
   apache:
@@ -276,3 +276,31 @@ services:
       - backend
     # depends_on:
       # - workspace
+
+  #────: Nginx
+  nginx:
+    container_name: ${PROJECT_NAME}.nginx
+    image: nginx:${NGINX_VERSION}
+    build:
+      context: ./web-servers/nginx
+      args:
+        - UPSTREAM_CONTAINER=${NGINX_UPSTREAM_CONTAINER}
+        - UPSTREAM_PORT=${NGINX_UPSTREAM_PORT}
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    volumes:
+      - ${APP_HOST_CODE_PATH}:${APP_CONTAINER_CODE_PATH}${APP_CONTAINER_CODE_FLAG}
+      - ${APP_HOST_STORAGE}/${PROJECT_NAME}/nginx/logs:/var/log/nginx
+      # - ${NGINX_CONF_PATH}:/etc/nginx/conf.d
+      # - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
+      # - ${NGINX_SSL_PATH}:/etc/nginx/ssl
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "${WEB_HTTP_PORT}:80"
+      - "${WEB_HTTPS_PORT}:443"
+      - "${VARNISH_BACKEND_PORT}:81"
+    networks:
+      - frontend
+      - backend
+      
