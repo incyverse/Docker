@@ -1,0 +1,30 @@
+server {
+    listen  80 default_server;
+    listen  [::]:80 default_server ipv6only=on;
+
+    # For https
+    # listen  443 ssl default_server;
+    # listen  [::]:443 ssl default_server ipv6only=on;
+    # ssl_certificate     /etc/nginx/ssl/default.crt;
+    # ssl_certificate_key /etc/nginx/ssl/default.key;
+
+    server_name localhost;
+
+    access_log  /var/log/nginx/proxy_access.log;
+
+    location / {
+        root    /var/www/public;
+        index   index.html index.htm;
+    }
+
+    # pass requests for dynamic content to rails/turbogears/zope, et al
+    location / {
+        proxy_pass  http://default;
+    }
+
+    location ~ /api {
+        proxy_pass  http://tomcat;
+    }
+
+    error_log   /var/log/nginx/proxy_error.log;
+}

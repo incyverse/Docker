@@ -1,9 +1,9 @@
 #
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━IMAGE SETUP━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#   TOMCAT IMAGE SETUP
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG VERSION
+ARG VERSION=latest
 FROM tomcat:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
@@ -26,14 +26,15 @@ RUN mv /etc/localtime /etc/localtime_UTC && \
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV CATALINA_BASE=/usr/local/tomcat
 
+ENV JAVA_OPTS="-Dspring.profiles.active=$PROFILE"
+
 ADD setenv.sh /usr/local/tomcat/bin
 
 # ARG PROJECT_NAME
-
 RUN rm -rf /usr/local/tomcat/webapps/*
 # COPY ./${PROJECT_NAME}.war /usr/local/tomcat/webapps/ROOT.war
 
-ENTRYPOINT [ "/usr/local/tomcat/bin/catalina.sh", "run" ]
+# ENTRYPOINT [ "/usr/local/tomcat/bin/catalina.sh", "run" ]
 
 WORKDIR /usr/local/tomcat
 

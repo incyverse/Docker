@@ -1,0 +1,21 @@
+server {
+    server_name localhost;
+
+    access_log  /var/log/nginx/dynamic.access.log;
+
+    root /var/www;
+
+    location = / {
+        rewrite ^ /home redirect;
+    }
+
+    location / {
+        set $inc $request_uri;
+        if (!-f $request_filename) {
+            rewrite ^ /index.html last;
+        }
+        if (!-f $document_root$inc.html) {
+            return 404;
+        }
+    }
+}
