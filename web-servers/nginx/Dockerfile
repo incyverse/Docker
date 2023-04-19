@@ -24,7 +24,9 @@ RUN set -xe; \
         vim \
         wget
 
-# COPY ../../nginx.conf /etc/nginx
+COPY ./nginx.conf /etc/nginx
+COPY ./mime.types /etc/nginx
+COPY ./fastcgi_params /etc/nginx
 
 RUN touch /var/log/messages
 

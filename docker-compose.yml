@@ -292,10 +292,9 @@ services:
     volumes:
       - ${APP_HOST_CODE_PATH}:${APP_CONTAINER_CODE_PATH}${APP_CONTAINER_CODE_FLAG}
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/nginx/logs:/var/log/nginx
-      # - ${NGINX_CONF_PATH}:/etc/nginx/conf.d
-      # - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
-      # - ${NGINX_SSL_PATH}:/etc/nginx/ssl
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ${NGINX_CONF_PATH}:/etc/nginx/conf.d
+      - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
+      - ${NGINX_SSL_PATH}:/etc/nginx/ssl
     ports:
       - "${WEB_HTTP_PORT}:80"
       - "${WEB_HTTPS_PORT}:443"
