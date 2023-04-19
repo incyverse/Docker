@@ -8,6 +8,9 @@ FROM nginx:${NGINX_VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
+#────:
+USER root
+
 RUN set -xe; \
     apt-get update -yqq && \
     apt-get upgrade -yqq && \
@@ -38,9 +41,7 @@ COPY logrotate/nginx /etc/logrotate.d/
 # Set upstream conf and remove the default conf
 # RUN echo "upstream php-upstream { server ${UPSTREAM_CONTAINER}:${UPSTREAM_PORT}; }" > /etc/nginx/conf.d/upstream.conf && rm /etc/nginx/conf.d/default.conf
 
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    rm /var/log/lastlog /var/log/faillog
+RUN apt-get clean
 
 # ADD ./startup.sh /opt/startup.sh
 # RUN sed -i 's/\r//g' /opt/startup.sh

@@ -8,14 +8,14 @@ FROM tomcat:${VERSION}
 
 LABEL maintainer="Anthony Oh <incyverse@gmail.com>"
 
+#────:
 USER root
 
 RUN set -xe; \
     apt-get update -yqq && \
     apt-get upgrade -yqq && \
     apt-get install -yqq \
-        vim && \
-    apt-get clean
+        vim
 
 ARG TZ=UTC
 ENV TZ=${TZ}
@@ -35,6 +35,9 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 # COPY ./${PROJECT_NAME}.war /usr/local/tomcat/webapps/ROOT.war
 
 # ENTRYPOINT [ "/usr/local/tomcat/bin/catalina.sh", "run" ]
+
+# Clean up
+RUN apt-get clean
 
 WORKDIR /usr/local/tomcat
 

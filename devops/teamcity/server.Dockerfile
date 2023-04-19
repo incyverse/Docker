@@ -3,7 +3,7 @@
 #   TEAMCITY IMAGE SETUP
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-ARG TEAMCITY_VERSION=latest
-FROM jetbrains/teamcity-server:${TEAMCITY_VERSION}
+ARG VERSION=latest
+FROM jetbrains/teamcity-server:${VERSION}
 
 EXPOSE 8111
