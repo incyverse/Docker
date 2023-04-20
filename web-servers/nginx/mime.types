@@ -58,7 +58,7 @@ types {
   application/vnd.google-earth.kml+xml  kml;
   application/vnd.google-earth.kmz      kmz;
   application/vnd.ms-excel              xls;
-  application/vnd.ms-fontobject         eot;
+  #application/vnd.ms-fontobject         eot;
   application/vnd.ms-powrpoint          ppt;
   application/vnd.oasis.opendocument.graphics     odg;
   application/vnd.oasis.opendocument.presentation odp;
