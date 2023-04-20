@@ -212,8 +212,8 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
         npm config set fetch-retry-maxtimeout ${NPM_FETCH_RETRY_MAXTIMEOUT} && \
         if [ ${NPM_REGISTRY} ]; then \
             npm config set registry ${NPM_REGISTRY}; \
-        fi && \
-        ln -s `npm bin --global` /home/${USER}/.node-bin; \
+        fi; \
+        # ln -s `npm bin --global` /home/${USER}/.node-bin; \
     fi
 
 # Wouldn't execute when added to the RUN statement in the above block

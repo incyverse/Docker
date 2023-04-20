@@ -19,7 +19,7 @@ services:
     image: docker:20.10-dind
     privileged: true
     environment:
-      DOCKER_TLS_SAN: DNS:docker-in-docker
+      - DOCKER_TLS_SAN=DNS:docker-in-docker
     volumes:
       - ${APP_HOST_CODE_PATH}:${APP_CONTAINER_CODE_PATH}
       - docker-in-docker:/certs/client
@@ -178,8 +178,8 @@ services:
     networks:
       - frontend
       - backend
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
   
   teamcity-agent:
     container_name: ${PROJECT_NAME}.teamcity-agent
@@ -231,8 +231,9 @@ services:
       - TEAMCITY_PASS=${PROJECT_NAME}${TEAMCITY_POSTGRESQL_PASSWORD}
     volumes:
       - ${APP_HOST_STORAGE}/${PROJECT_NAME}/postgresql/data:/var/lib/postgresql/data
+      - ${POSTGRESQL_CONF_PATH}:/etc/postgresql
       - ${POSTGRESQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
-      # - postgresql:/var/lib/postgresql/data
+      - postgresql:/var/lib/postgresql/data
     ports:
       - ${POSTGRESQL_PORT}:5432
     networks:
@@ -322,6 +323,7 @@ services:
       - ${NGINX_CONF_PATH}:/etc/nginx/conf.d
       - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
       - ${NGINX_SSL_PATH}:/etc/nginx/ssl
+      # - /etc/nginx/:/etc/nginx/
     ports:
       - "${WEB_HTTP_PORT}:80"
       - "${WEB_HTTPS_PORT}:443"
